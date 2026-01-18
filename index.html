@@ -3,41 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IA Express - Generador de Flyers Reales</title>
+    <title>IA Express - Generador Seguro</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
     <div class="container">
         <h1>Flyer IA Express</h1>
-        
         <div class="editor-layout">
             <div id="flyer-canvas" class="flyer">
-                <div id="loader" class="loader">IA Creando Imagen...</div>
+                <div id="loader" class="loader">IA Generando...</div>
                 <div class="overlay"></div>
                 <div class="content">
-                    <h2 id="display-title">Tu Título Aquí</h2>
-                    <p id="display-subtitle">Slogan o descripción breve</p>
+                    <h2 id="display-title">Tu Título</h2>
+                    <p id="display-subtitle">Tu Subtítulo</p>
                 </div>
             </div>
-
             <div class="controls">
-                <label>Título (Describe tu imagen):</label>
-                <input type="text" id="input-title" placeholder="Ej: Camiseta futurista de neón">
-                
+                <label>Descripción para la IA:</label>
+                <input type="text" id="input-title" placeholder="Ej: Camiseta de fútbol galáctica">
                 <label>Subtítulo:</label>
-                <input type="text" id="input-subtitle" placeholder="Escribe el subtítulo...">
-
-                <div class="ia-info">
-                    <p><strong>Tip:</strong> Sé descriptivo. La IA creará una imagen única basada en tu título.</p>
-                </div>
-
-                <button id="btn-generate">Generar Imagen con IA</button>
-                <button id="btn-download" class="secondary">Descargar Flyer</button>
+                <input type="text" id="input-subtitle" placeholder="Escribe algo corto...">
+                <button id="btn-generate">Generar con IA</button>
+                <button id="btn-download" class="secondary">Descargar</button>
             </div>
         </div>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
