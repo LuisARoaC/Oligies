@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Flyers - Picsum API</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Creador de Flyers Express</h1>
+        
+        <div class="editor-layout">
+            <div id="flyer-canvas" class="flyer">
+                <div class="overlay"></div>
+                <div class="content">
+                    <h2 id="display-title">Tu Título Aquí</h2>
+                    <p id="display-subtitle">Slogan o descripción breve</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <label>Título:</label>
+                <input type="text" id="input-title" placeholder="Escribe el título...">
+                
+                <label>Subtítulo:</label>
+                <input type="text" id="input-subtitle" placeholder="Escribe el subtítulo...">
+
+                <button id="btn-refresh">Cambiar Imagen (Picsum)</button>
+                <button id="btn-download" class="secondary">Descargar Flyer</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
