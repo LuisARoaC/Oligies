@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Flyers - Picsum API</title>
+    <title>IA Express - Generador de Flyers</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="container">
-        <h1>Creador de Flyers Express</h1>
+        <h1>Flyer IA Express</h1>
         
         <div class="editor-layout">
             <div id="flyer-canvas" class="flyer">
+                <div id="loader" class="loader">Cargando...</div>
                 <div class="overlay"></div>
                 <div class="content">
                     <h2 id="display-title">Tu Título Aquí</h2>
@@ -21,13 +22,17 @@
             </div>
 
             <div class="controls">
-                <label>Título:</label>
-                <input type="text" id="input-title" placeholder="Escribe el título...">
+                <label>Título (Orden de IA):</label>
+                <input type="text" id="input-title" placeholder="Ej: Ropa de verano o Tecnología">
                 
                 <label>Subtítulo:</label>
                 <input type="text" id="input-subtitle" placeholder="Escribe el subtítulo...">
 
-                <button id="btn-refresh">Cambiar Imagen (Picsum)</button>
+                <div class="ia-info">
+                    <p><strong>Palabras clave:</strong> Moda, Tecnología, Naturaleza, Comida, Ciudad.</p>
+                </div>
+
+                <button id="btn-refresh">Generar otra variante</button>
                 <button id="btn-download" class="secondary">Descargar Flyer</button>
             </div>
         </div>
