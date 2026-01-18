@@ -2,26 +2,41 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Flyer IA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flyer IA Express - Sin API Key</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="editor">
-        <div id="flyer-preview" class="preview">
-            <div id="loader" class="loader">IA...</div>
-            <div class="info">
-                <h2 id="display-title">Título</h2>
-                <p id="display-subtitle">Subtítulo</p>
+    <div class="container">
+        <h1>Generador de Flyers IA</h1>
+        <div class="main-layout">
+            <div id="flyer-preview" class="flyer">
+                <div id="loader" class="loader">Generando Imagen...</div>
+                <div class="overlay"></div>
+                <div class="content">
+                    <h2 id="display-title">Título del Flyer</h2>
+                    <p id="display-subtitle">Subtítulo aquí</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <label>¿Qué quieres ver en la imagen?</label>
+                <input type="text" id="input-prompt" placeholder="Ej: Un estadio futurista neón">
+                
+                <label>Título del Flyer:</label>
+                <input type="text" id="input-title" placeholder="Ej: GRAN FINAL">
+                
+                <label>Subtítulo:</label>
+                <input type="text" id="input-subtitle" placeholder="Ej: Próximo Domingo">
+
+                <button id="btn-generate">1. Generar Imagen</button>
+                <button id="btn-download" class="secondary">2. Descargar Flyer</button>
             </div>
         </div>
-        <div class="controls">
-            <input type="text" id="input-title" placeholder="Título para la IA">
-            <input type="text" id="input-subtitle" placeholder="Subtítulo">
-            <button id="btn-generate">Generar Fondo</button>
-            <button id="btn-download" style="background:green">Descargar</button>
-        </div>
     </div>
+
     <canvas id="hidden-canvas" width="800" height="1000" style="display:none;"></canvas>
+
     <script src="script.js"></script>
 </body>
 </html>
