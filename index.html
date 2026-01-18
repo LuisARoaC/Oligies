@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IA Express - Generador de Flyers</title>
+    <title>IA Express - Generador de Flyers Reales</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -13,7 +13,7 @@
         
         <div class="editor-layout">
             <div id="flyer-canvas" class="flyer">
-                <div id="loader" class="loader">Cargando...</div>
+                <div id="loader" class="loader">IA Creando Imagen...</div>
                 <div class="overlay"></div>
                 <div class="content">
                     <h2 id="display-title">Tu Título Aquí</h2>
@@ -22,17 +22,17 @@
             </div>
 
             <div class="controls">
-                <label>Título (Orden de IA):</label>
-                <input type="text" id="input-title" placeholder="Ej: Ropa de verano o Tecnología">
+                <label>Título (Describe tu imagen):</label>
+                <input type="text" id="input-title" placeholder="Ej: Camiseta futurista de neón">
                 
                 <label>Subtítulo:</label>
                 <input type="text" id="input-subtitle" placeholder="Escribe el subtítulo...">
 
                 <div class="ia-info">
-                    <p><strong>Palabras clave:</strong> Moda, Tecnología, Naturaleza, Comida, Ciudad.</p>
+                    <p><strong>Tip:</strong> Sé descriptivo. La IA creará una imagen única basada en tu título.</p>
                 </div>
 
-                <button id="btn-refresh">Generar otra variante</button>
+                <button id="btn-generate">Generar Imagen con IA</button>
                 <button id="btn-download" class="secondary">Descargar Flyer</button>
             </div>
         </div>
@@ -41,3 +41,4 @@
     <script src="script.js"></script>
 </body>
 </html>
+
