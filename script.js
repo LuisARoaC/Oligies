@@ -1,83 +1,31 @@
-body {
-    font-family: 'Segoe UI', sans-serif;
-    background-color: #f4f4f9;
-    display: flex;
-    justify-content: center;
-    padding: 20px;
+const flyer = document.getElementById('flyer-canvas');
+const btnRefresh = document.getElementById('btn-refresh');
+const inputTitle = document.getElementById('input-title');
+const inputSubtitle = document.getElementById('input-subtitle');
+const displayTitle = document.getElementById('display-title');
+const displaySubtitle = document.getElementById('display-subtitle');
+
+// Función para obtener imagen aleatoria de Picsum
+function updateBackground() {
+    const randomId = Math.floor(Math.random() * 1000);
+    const imageUrl = `https://picsum.photos/id/${randomId}/800/1000`;
+    
+    // Aplicar la imagen al contenedor
+    flyer.style.backgroundImage = `url('${imageUrl}')`;
 }
 
-.container {
-    max-width: 900px;
-    width: 100%;
-    text-align: center;
-}
+// Actualizar texto en tiempo real
+inputTitle.addEventListener('input', (e) => {
+    displayTitle.innerText = e.target.value || "Tu Título Aquí";
+});
 
-.editor-layout {
-    display: flex;
-    gap: 30px;
-    justify-content: center;
-    align-items: flex-start;
-    margin-top: 20px;
-}
+inputSubtitle.addEventListener('input', (e) => {
+    displaySubtitle.innerText = e.target.value || "Slogan o descripción breve";
+});
 
-/* Estilo del Flyer */
-.flyer {
-    width: 400px;
-    height: 500px;
-    background-size: cover;
-    background-position: center;
-    position: relative;
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    transition: background-image 0.5s ease-in-out;
-}
+// Evento de clic para nueva imagen
+btnRefresh.addEventListener('click', updateBackground);
 
-.overlay {
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.4); /* Oscurece la foto para que se lea el texto */
-}
+// Cargar imagen inicial
+updateBackground();
 
-.content {
-    position: relative;
-    z-index: 2;
-    padding: 20px;
-}
-
-/* Controles */
-.controls {
-    background: white;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    display: flex;
-    flex-direction: column;
-    width: 300px;
-    text-align: left;
-}
-
-input {
-    margin-bottom: 15px;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-}
-
-button {
-    padding: 12px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    margin-bottom: 10px;
-}
-
-button:hover { background-color: #0056b3; }
-.secondary { background-color: #28a745; }
