@@ -1,59 +1,75 @@
 const flyer = document.getElementById('flyer-canvas');
+const loader = document.getElementById('loader');
 const inputTitle = document.getElementById('input-title');
 const inputSubtitle = document.getElementById('input-subtitle');
 const displayTitle = document.getElementById('display-title');
 const displaySubtitle = document.getElementById('display-subtitle');
+const btnRefresh = document.getElementById('btn-refresh');
 
-// DICCIONARIO DE TEMAS (IDs seleccionados de Picsum para Flyers)
-const temasPicsum = {
-    "moda": [157, 334, 338, 445],
-    "tecnologia": [0, 1, 2, 370, 449],
-    "naturaleza": [10, 11, 28, 54, 103],
-    "comida": [429, 488, 493, 1080],
-    "deporte": [1077, 1084, 73],
-    "arquitectura": [1031, 1040, 122],
-    "default": [237, 433, 566] // Perros y texturas
+// DICCIONARIO DE ÓRDENES (IDs seleccionados manualmente de Picsum)
+const bibliotecaIA = {
+    "moda": [157, 334, 338, 445, 829],
+    "tecnologia": [0, 1, 2, 3, 370, 449],
+    "naturaleza": [10, 11, 28, 54, 103, 116],
+    "comida": [429, 488, 493, 1080, 1060],
+    "ciudad": [1031, 1040, 122, 367, 382]
 };
 
-function actualizarFlyerPorOrden() {
+function generarImagenIA() {
     const texto = inputTitle.value.toLowerCase();
     let idSeleccionado = null;
+    
+    // Mostrar loader
+    loader.style.display = "block";
+    flyer.style.opacity = "0.8";
 
-    // Lógica de "Orden Directa"
+    // Lógica de detección de palabras
     if (texto.includes("moda") || texto.includes("ropa")) {
-        idSeleccionado = obtenerIdAzar(temasPicsum.moda);
-    } else if (texto.includes("pc") || texto.includes("web") || texto.includes("tecnologia")) {
-        idSeleccionado = obtenerIdAzar(temasPicsum.tecnologia);
-    } else if (texto.includes("viaje") || texto.includes("campo") || texto.includes("naturaleza")) {
-        idSeleccionado = obtenerIdAzar(temasPicsum.naturaleza);
-    } else if (texto.includes("hamburguesa") || texto.includes("comida") || texto.includes("restaurante")) {
-        idSeleccionado = obtenerIdAzar(temasPicsum.comida);
+        idSeleccionado = elegirId(bibliotecaIA.moda);
+    } else if (texto.includes("tecnologia") || texto.includes("computador") || texto.includes("ia")) {
+        idSeleccionado = elegirId(bibliotecaIA.tecnologia);
+    } else if (texto.includes("naturaleza") || texto.includes("viaje") || texto.includes("paisaje")) {
+        idSeleccionado = elegirId(bibliotecaIA.naturaleza);
+    } else if (texto.includes("comida") || texto.includes("hamburguesa") || texto.includes("cafe")) {
+        idSeleccionado = elegirId(bibliotecaIA.comida);
+    } else if (texto.includes("ciudad") || texto.includes("edificio") || texto.includes("urbano")) {
+        idSeleccionado = elegirId(bibliotecaIA.ciudad);
     } else {
-        // Si no detecta palabra clave, da una imagen profesional aleatoria
-        idSeleccionado = Math.floor(Math.random() * 500);
+        // ID aleatorio si no hay coincidencia
+        idSeleccionado = Math.floor(Math.random() * 1000);
     }
 
-    // Aplicar la orden a Picsum
-    const url = `https://picsum.photos/id/${idSeleccionado}/800/1000`;
-    flyer.style.backgroundImage = `url('${url}')`;
+    const imgUrl = `https://picsum.photos/id/${idSeleccionado}/800/1000`;
+    
+    // Precarga de imagen para evitar parpadeos
+    const tempImg = new Image();
+    tempImg.src = imgUrl;
+    tempImg.onload = () => {
+        flyer.style.backgroundImage = `url('${imgUrl}')`;
+        loader.style.display = "none";
+        flyer.style.opacity = "1";
+    };
 }
 
-function obtenerIdAzar(lista) {
+function elegirId(lista) {
     return lista[Math.floor(Math.random() * lista.length)];
 }
 
-// Eventos para que reaccione al escribir
+// Eventos
 inputTitle.addEventListener('input', (e) => {
-    displayTitle.innerText = e.target.value;
-    // Solo cambia la imagen si el usuario deja de escribir un momento (para no saturar)
-    clearTimeout(window.espera);
-    window.espera = setTimeout(actualizarFlyerPorOrden, 1000);
+    displayTitle.innerText = e.target.value || "Tu Título Aquí";
+    
+    // Espera 800ms después de que el usuario deja de escribir para cambiar la imagen
+    clearTimeout(window.iaTimer);
+    window.iaTimer = setTimeout(generarImagenIA, 800);
 });
 
 inputSubtitle.addEventListener('input', (e) => {
-    displaySubtitle.innerText = e.target.value;
+    displaySubtitle.innerText = e.target.value || "Slogan o descripción breve";
 });
 
-// Carga inicial
-actualizarFlyerPorOrden();
+btnRefresh.addEventListener('click', generarImagenIA);
+
+// Inicio
+generarImagenIA();
 
