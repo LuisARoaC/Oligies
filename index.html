@@ -2,37 +2,31 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Flyers IA</title>
+    <title>Flyer IA Express</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>Flyer IA Express</h1>
-        <div class="editor-layout">
-            <div id="flyer-canvas-container" class="flyer">
-                <div id="loader" class="loader">IA Generando...</div>
-                <div class="overlay"></div>
-                <div class="content">
-                    <h2 id="display-title">Tu Título</h2>
-                    <p id="display-subtitle">Tu Subtítulo</p>
+        <h1>Generador de Flyers IA</h1>
+        <div class="main-layout">
+            <div id="flyer-canvas-container" class="flyer-preview">
+                <div id="loader" class="loader">Esperando...</div>
+                <div class="text-overlay">
+                    <h2 id="display-title">Título</h2>
+                    <p id="display-subtitle">Subtítulo</p>
                 </div>
             </div>
-            
-            <div class="controls">
-                <label>Título e Imagen:</label>
-                <input type="text" id="input-title" placeholder="Ej: Playa paradisíaca">
-                <label>Texto inferior:</label>
-                <input type="text" id="input-subtitle" placeholder="Ej: Vacaciones 2026">
-                
-                <button id="btn-generate">1. Generar con IA</button>
-                <button id="btn-download" class="secondary">2. Descargar Flyer</button>
+
+            <div class="sidebar">
+                <input type="text" id="input-title" placeholder="Descripción para la IA...">
+                <input type="text" id="input-subtitle" placeholder="Subtítulo corto...">
+                <button id="btn-generate">1. Generar Fondo</button>
+                <button id="btn-download" class="btn-success">2. Descargar Flyer</button>
             </div>
         </div>
     </div>
-
     <canvas id="hidden-canvas" width="800" height="1000" style="display:none;"></canvas>
-
     <script src="script.js"></script>
 </body>
 </html>
+
