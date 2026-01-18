@@ -1,35 +1,38 @@
-const flyer = document.getElementById('flyer-canvas');
-const loader = document.getElementById('loader');
-const inputTitle = document.getElementById('input-title');
-const displayTitle = document.getElementById('display-title');
-
-document.getElementById('btn-generate').addEventListener('click', async () => {
+async function generarConIA() {
     const prompt = inputTitle.value;
-    if (!prompt) return alert("Escribe algo primero");
+    if (!prompt) return alert("Escribe una descripción");
 
     loader.style.display = "block";
+    loader.innerText = "La IA está despertando... (espera 20s)";
     
     try {
-        // Llamamos a nuestra función secreta en Vercel
         const response = await fetch("/api/generar", {
             method: "POST",
             body: JSON.stringify({ prompt: prompt }),
         });
 
+        // Si el servidor está cargando (Error 503), esperamos y reintentamos
+        if (response.status === 503) {
+            loader.innerText = "Casi listo, reintentando...";
+            setTimeout(generarConIA, 10000); // Espera 10 segundos y vuelve a intentar
+            return;
+        }
+
+        if (!response.ok) throw new Error();
+
         const data = await response.json();
         if (data.image) {
             flyer.style.backgroundImage = `url('${data.image}')`;
-        } else {
-            throw new Error();
+            loader.innerText = "¡Imagen creada!";
         }
     } catch (e) {
-        alert("La IA está despertando. Reintenta en 10 segundos.");
+        console.error(e);
+        alert("Hubo un problema. Reintenta en un momento.");
     } finally {
-        loader.style.display = "none";
+        // Solo quitamos el loader si hubo éxito o error definitivo
+        if (loader.innerText !== "Casi listo, reintentando...") {
+            setTimeout(() => { loader.style.display = "none"; }, 2000);
+        }
     }
-});
+}
 
-// Actualizar texto
-inputTitle.addEventListener('input', (e) => {
-    displayTitle.innerText = e.target.value;
-});
