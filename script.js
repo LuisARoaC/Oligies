@@ -66,4 +66,3 @@ document.getElementById('btn-download').addEventListener('click', () => {
     link.href = canvas.toDataURL();
     link.click();
 });
-
