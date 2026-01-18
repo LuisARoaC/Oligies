@@ -1,17 +1,28 @@
 const flyer = document.getElementById('flyer-canvas');
-const btnRefresh = document.getElementById('btn-refresh');
 const inputTitle = document.getElementById('input-title');
 const inputSubtitle = document.getElementById('input-subtitle');
 const displayTitle = document.getElementById('display-title');
 const displaySubtitle = document.getElementById('display-subtitle');
+const btnRefresh = document.getElementById('btn-refresh');
 
-// Función para obtener imagen aleatoria de Picsum
-function updateBackground() {
-    const randomId = Math.floor(Math.random() * 1000);
-    const imageUrl = `https://picsum.photos/id/${randomId}/800/1000`;
+// Función para actualizar la imagen basada en el texto
+function updateImageByKeyword() {
+    // Tomamos la primera palabra del título o del subtítulo
+    const keyword = inputTitle.value.split(" ")[0] || inputSubtitle.value.split(" ")[0] || "abstract";
     
-    // Aplicar la imagen al contenedor
-    flyer.style.backgroundImage = `url('${imageUrl}')`;
+    // Usamos Source Unsplash para buscar por tema
+    // Formato: https://source.unsplash.com/featured/800x1000?palabra-clave
+    const imageUrl = `https://source.unsplash.com/featured/800x1000?${encodeURIComponent(keyword)}`;
+    
+    // Mostramos un efecto de carga
+    flyer.style.opacity = "0.7";
+    
+    const img = new Image();
+    img.src = imageUrl;
+    img.onload = function() {
+        flyer.style.backgroundImage = `url('${imageUrl}')`;
+        flyer.style.opacity = "1";
+    };
 }
 
 // Actualizar texto en tiempo real
@@ -23,9 +34,10 @@ inputSubtitle.addEventListener('input', (e) => {
     displaySubtitle.innerText = e.target.value || "Slogan o descripción breve";
 });
 
-// Evento de clic para nueva imagen
-btnRefresh.addEventListener('click', updateBackground);
+// Cuando el usuario termine de escribir (al quitar el foco) o pulse el botón
+inputTitle.addEventListener('blur', updateImageByKeyword);
+btnRefresh.addEventListener('click', updateImageByKeyword);
 
-// Cargar imagen inicial
-updateBackground();
+// Carga inicial
+updateImageByKeyword();
 
