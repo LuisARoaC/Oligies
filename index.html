@@ -3,40 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flyer IA Express - Sin API Key</title>
+    <title>Flyer IA Pro Editor</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>Generador de Flyers IA</h1>
+        <h1>Editor de Flyers IA</h1>
         <div class="main-layout">
             <div id="flyer-preview" class="flyer">
-                <div id="loader" class="loader">Generando Imagen...</div>
+                <div id="loader" class="loader">Generando...</div>
                 <div class="overlay"></div>
-                <div class="content">
-                    <h2 id="display-title">Título del Flyer</h2>
-                    <p id="display-subtitle">Subtítulo aquí</p>
+                
+                <div id="cont-title" class="text-wrap pos-center">
+                    <h2 id="display-title">TÍTULO</h2>
+                </div>
+                <div id="cont-subtitle" class="text-wrap pos-bottom">
+                    <p id="display-subtitle">Subtítulo</p>
                 </div>
             </div>
 
-            <div class="controls">
-                <label>¿Qué quieres ver en la imagen?</label>
-                <input type="text" id="input-prompt" placeholder="Ej: Un estadio futurista neón">
-                
-                <label>Título del Flyer:</label>
-                <input type="text" id="input-title" placeholder="Ej: GRAN FINAL">
-                
-                <label>Subtítulo:</label>
-                <input type="text" id="input-subtitle" placeholder="Ej: Próximo Domingo">
+            <div class="sidebar">
+                <section class="group">
+                    <label>Fondo (IA):</label>
+                    <input type="text" id="input-prompt" placeholder="Ej: Paisaje de montaña neón">
+                    <button id="btn-generate">Generar Imagen</button>
+                </section>
 
-                <button id="btn-generate">1. Generar Imagen</button>
-                <button id="btn-download" class="secondary">2. Descargar Flyer</button>
+                <section class="group">
+                    <label>Configurar Título:</label>
+                    <input type="text" id="input-title" placeholder="Escribe el título...">
+                    <div class="actions">
+                        <select id="pos-title">
+                            <option value="pos-top">Arriba</option>
+                            <option value="pos-center" selected>Centro</option>
+                            <option value="pos-bottom">Abajo</option>
+                        </select>
+                        <button id="toggle-title" class="btn-sm">Ocultar</button>
+                    </div>
+                </section>
+
+                <section class="group">
+                    <label>Configurar Subtítulo:</label>
+                    <input type="text" id="input-subtitle" placeholder="Escribe el subtítulo...">
+                    <div class="actions">
+                        <select id="pos-subtitle">
+                            <option value="pos-top">Arriba</option>
+                            <option value="pos-center">Centro</option>
+                            <option value="pos-bottom" selected>Abajo</option>
+                        </select>
+                        <button id="toggle-subtitle" class="btn-sm">Ocultar</button>
+                    </div>
+                </section>
+
+                <button id="btn-download" class="secondary">Descargar Flyer</button>
             </div>
         </div>
     </div>
-
     <canvas id="hidden-canvas" width="800" height="1000" style="display:none;"></canvas>
-
     <script src="script.js"></script>
 </body>
 </html>
