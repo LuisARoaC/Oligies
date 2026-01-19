@@ -4,73 +4,91 @@ const inputPrompt = document.getElementById('input-prompt');
 const inputTitle = document.getElementById('input-title');
 const inputSubtitle = document.getElementById('input-subtitle');
 
-const displayTitle = document.getElementById('display-title');
-const displaySubtitle = document.getElementById('display-subtitle');
+// Elementos visuales
+const contTitle = document.getElementById('cont-title');
+const contSubtitle = document.getElementById('cont-subtitle');
+const dispTitle = document.getElementById('display-title');
+const dispSubtitle = document.getElementById('display-subtitle');
 
 let imageReady = null;
+let showTitle = true;
+let showSubtitle = true;
 
-// Sincronizar textos en tiempo real
-inputTitle.addEventListener('input', () => displayTitle.innerText = inputTitle.value || "Título");
-inputSubtitle.addEventListener('input', () => displaySubtitle.innerText = inputSubtitle.value || "Subtítulo");
+// --- SINCRONIZACIÓN ---
+inputTitle.addEventListener('input', () => dispTitle.innerText = inputTitle.value || "TÍTULO");
+inputSubtitle.addEventListener('input', () => dispSubtitle.innerText = inputSubtitle.value || "Subtítulo");
 
-// 1. GENERAR IMAGEN
-document.getElementById('btn-generate').addEventListener('click', () => {
-    const prompt = inputPrompt.value;
-    if (!prompt) return alert("Por favor, describe la imagen que quieres.");
-
-    loader.style.display = "block";
-    
-    // Creamos la URL mágica de Pollinations
-    // Agregamos un número aleatorio al final para que no repita la misma imagen
-    const seed = Math.floor(Math.random() * 999999);
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?seed=${seed}&width=800&height=1000&nologo=true`;
-
-    const img = new Image();
-    img.crossOrigin = "anonymous"; // Vital para poder descargarla después
-    
-    img.onload = () => {
-        imageReady = img;
-        flyer.style.backgroundImage = `url('${imageUrl}')`;
-        loader.style.display = "none";
-    };
-
-    img.onerror = () => {
-        alert("Error al conectar con la IA. Intenta de nuevo.");
-        loader.style.display = "none";
-    };
-
-    img.src = imageUrl;
+// Cambiar Posiciones
+document.getElementById('pos-title').addEventListener('change', (e) => {
+    contTitle.className = `text-wrap ${e.target.value}`;
+});
+document.getElementById('pos-subtitle').addEventListener('change', (e) => {
+    contSubtitle.className = `text-wrap ${e.target.value}`;
 });
 
-// 2. DESCARGAR TODO JUNTO
-document.getElementById('btn-download').addEventListener('click', () => {
-    if (!imageReady) return alert("Primero genera una imagen.");
+// Mostrar/Ocultar
+document.getElementById('toggle-title').addEventListener('click', (e) => {
+    showTitle = !showTitle;
+    contTitle.style.display = showTitle ? "flex" : "none";
+    e.target.innerText = showTitle ? "Ocultar" : "Mostrar";
+});
+document.getElementById('toggle-subtitle').addEventListener('click', (e) => {
+    showSubtitle = !showSubtitle;
+    contSubtitle.style.display = showSubtitle ? "flex" : "none";
+    e.target.innerText = showSubtitle ? "Ocultar" : "Mostrar";
+});
 
+// --- GENERAR ---
+document.getElementById('btn-generate').addEventListener('click', () => {
+    if (!inputPrompt.value) return alert("Describe la imagen");
+    loader.style.display = "block";
+    const seed = Math.floor(Math.random() * 999999);
+    const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(inputPrompt.value)}?seed=${seed}&width=800&height=1000&nologo=true`;
+
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+        imageReady = img;
+        flyer.style.backgroundImage = `url('${url}')`;
+        loader.style.display = "none";
+    };
+    img.src = url;
+});
+
+// --- DESCARGAR ---
+document.getElementById('btn-download').addEventListener('click', () => {
+    if (!imageReady) return alert("Genera una imagen primero");
     const canvas = document.getElementById('hidden-canvas');
     const ctx = canvas.getContext('2d');
 
-    // Dibujar imagen de fondo
     ctx.drawImage(imageReady, 0, 0, canvas.width, canvas.height);
-
-    // Capa oscura para que el texto resalte
-    ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+    ctx.fillStyle = "rgba(0,0,0,0.3)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Estilo de texto
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
-    
-    // Título
-    ctx.font = "bold 70px Arial";
-    ctx.fillText(inputTitle.value.toUpperCase() || "TÍTULO", canvas.width / 2, canvas.height / 2);
 
-    // Subtítulo
-    ctx.font = "40px Arial";
-    ctx.fillText(inputSubtitle.value || "Subtítulo", canvas.width / 2, (canvas.height / 2) + 70);
+    // Función para calcular Y según posición
+    const getY = (pos) => {
+        if (pos === "pos-top") return 150;
+        if (pos === "pos-center") return 500;
+        return 850;
+    };
 
-    // Descargar
+    if (showTitle) {
+        ctx.font = "bold 70px Arial";
+        const y = getY(document.getElementById('pos-title').value);
+        ctx.fillText((inputTitle.value || "TÍTULO").toUpperCase(), 400, y);
+    }
+
+    if (showSubtitle) {
+        ctx.font = "40px Arial";
+        const y = getY(document.getElementById('pos-subtitle').value);
+        ctx.fillText(inputSubtitle.value || "Subtítulo", 400, y);
+    }
+
     const link = document.createElement('a');
-    link.download = `mi-flyer-ia.png`;
-    link.href = canvas.toDataURL('image/png');
+    link.download = "flyer-ia.png";
+    link.href = canvas.toDataURL();
     link.click();
 });
