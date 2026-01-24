@@ -1,8 +1,8 @@
-
+/* fonts.css */
 
 @font-face {
     font-family: 'Melon Pop';
-    src: url('fonts/Melon Pop.woff2') format('woff2');
+    src: url('fonts/melon.woff2') format('woff2');
 }
 
 @font-face {
@@ -12,20 +12,20 @@
 
 @font-face {
     font-family: 'Comic Neue';
-    src: url('fonts/ComicNeueSansID.woff2') format('woff2');
+    src: url('fonts/comic.woff2') format('woff2');
 }
 
 @font-face {
     font-family: 'Giants';
-    src: url('fonts/Giants.woff2') format('woff2');
+    src: url('fonts/giants.woff2') format('woff2');
 }
 
 @font-face {
-    font-family: 'Vehicle Breaks Down';
-    src: url('fonts/VehicleBreaksDown-Regular.woff2') format('woff2');
+    font-family: 'Vehicle';
+    src: url('fonts/vehicle.woff2') format('woff2');
 }
 
 @font-face {
     font-family: 'Broken';
-    src: url('fonts/Broken.woff2') format('woff2');
-} 
+    src: url('fonts/broken.woff2') format('woff2');
+}
