@@ -1,49 +1,44 @@
-document.getElementById('btn-download').addEventListener('click', async () => {
-    // Esta línea obliga al programa a esperar que las fuentes locales se activen
-    await document.fonts.ready;
 const flyer = document.getElementById('flyer-preview');
 const loader = document.getElementById('loader');
 const inputPrompt = document.getElementById('input-prompt');
 const inputTitle = document.getElementById('input-title');
 const inputSubtitle = document.getElementById('input-subtitle');
 
-const dispTitle = document.getElementById('display-title');
-const dispSubtitle = document.getElementById('display-subtitle');
+// Elementos visuales
 const contTitle = document.getElementById('cont-title');
 const contSubtitle = document.getElementById('cont-subtitle');
+const dispTitle = document.getElementById('display-title');
+const dispSubtitle = document.getElementById('display-subtitle');
 
 let imageReady = null;
 let showTitle = true;
 let showSubtitle = true;
 
-// Sincronización de Texto y Fuentes
+// --- SINCRONIZACIÓN ---
 inputTitle.addEventListener('input', () => dispTitle.innerText = inputTitle.value || "TÍTULO");
 inputSubtitle.addEventListener('input', () => dispSubtitle.innerText = inputSubtitle.value || "Subtítulo");
 
-document.getElementById('font-title').addEventListener('change', (e) => {
-    dispTitle.style.fontFamily = e.target.value;
+// Cambiar Posiciones
+document.getElementById('pos-title').addEventListener('change', (e) => {
+    contTitle.className = `text-wrap ${e.target.value}`;
 });
-document.getElementById('font-subtitle').addEventListener('change', (e) => {
-    dispSubtitle.style.fontFamily = e.target.value;
+document.getElementById('pos-subtitle').addEventListener('change', (e) => {
+    contSubtitle.className = `text-wrap ${e.target.value}`;
 });
 
-// Posiciones y Visibilidad
-document.getElementById('pos-title').addEventListener('change', (e) => contTitle.className = `text-wrap ${e.target.value}`);
-document.getElementById('pos-subtitle').addEventListener('change', (e) => contSubtitle.className = `text-wrap ${e.target.value}`);
-
+// Mostrar/Ocultar
 document.getElementById('toggle-title').addEventListener('click', (e) => {
     showTitle = !showTitle;
     contTitle.style.display = showTitle ? "flex" : "none";
     e.target.innerText = showTitle ? "Ocultar" : "Mostrar";
 });
-
 document.getElementById('toggle-subtitle').addEventListener('click', (e) => {
     showSubtitle = !showSubtitle;
     contSubtitle.style.display = showSubtitle ? "flex" : "none";
     e.target.innerText = showSubtitle ? "Ocultar" : "Mostrar";
 });
 
-// Generar Imagen
+// --- GENERAR ---
 document.getElementById('btn-generate').addEventListener('click', () => {
     if (!inputPrompt.value) return alert("Describe la imagen");
     loader.style.display = "block";
@@ -60,13 +55,9 @@ document.getElementById('btn-generate').addEventListener('click', () => {
     img.src = url;
 });
 
-// Descargar con soporte para fuentes
-document.getElementById('btn-download').addEventListener('click', async () => {
+// --- DESCARGAR ---
+document.getElementById('btn-download').addEventListener('click', () => {
     if (!imageReady) return alert("Genera una imagen primero");
-    
-    // Asegurar que las fuentes externas estén cargadas antes de dibujar
-    await document.fonts.ready;
-
     const canvas = document.getElementById('hidden-canvas');
     const ctx = canvas.getContext('2d');
 
@@ -77,6 +68,7 @@ document.getElementById('btn-download').addEventListener('click', async () => {
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
 
+    // Función para calcular Y según posición
     const getY = (pos) => {
         if (pos === "pos-top") return 150;
         if (pos === "pos-center") return 500;
@@ -84,15 +76,13 @@ document.getElementById('btn-download').addEventListener('click', async () => {
     };
 
     if (showTitle) {
-        const font = document.getElementById('font-title').value;
-        ctx.font = `bold 70px "${font}"`;
+        ctx.font = "bold 70px Arial";
         const y = getY(document.getElementById('pos-title').value);
         ctx.fillText((inputTitle.value || "TÍTULO").toUpperCase(), 400, y);
     }
 
     if (showSubtitle) {
-        const fontSub = document.getElementById('font-subtitle').value;
-        ctx.font = `40px "${fontSub}"`;
+        ctx.font = "40px Arial";
         const y = getY(document.getElementById('pos-subtitle').value);
         ctx.fillText(inputSubtitle.value || "Subtítulo", 400, y);
     }
@@ -102,4 +92,3 @@ document.getElementById('btn-download').addEventListener('click', async () => {
     link.href = canvas.toDataURL();
     link.click();
 });
-
