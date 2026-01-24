@@ -1,3 +1,6 @@
+document.getElementById('btn-download').addEventListener('click', async () => {
+    // Esta línea obliga al programa a esperar que las fuentes locales se activen
+    await document.fonts.ready;
 const flyer = document.getElementById('flyer-preview');
 const loader = document.getElementById('loader');
 const inputPrompt = document.getElementById('input-prompt');
@@ -99,3 +102,4 @@ document.getElementById('btn-download').addEventListener('click', async () => {
     link.href = canvas.toDataURL();
     link.click();
 });
+
