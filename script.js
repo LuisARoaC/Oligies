@@ -4,7 +4,6 @@ const inputPrompt = document.getElementById('input-prompt');
 const inputTitle = document.getElementById('input-title');
 const inputSubtitle = document.getElementById('input-subtitle');
 
-// Elementos visuales
 const contTitle = document.getElementById('cont-title');
 const contSubtitle = document.getElementById('cont-subtitle');
 const dispTitle = document.getElementById('display-title');
@@ -14,9 +13,16 @@ let imageReady = null;
 let showTitle = true;
 let showSubtitle = true;
 
-// --- SINCRONIZACIÓN ---
+// --- SINCRONIZACIÓN DE TEXTO Y FUENTES ---
 inputTitle.addEventListener('input', () => dispTitle.innerText = inputTitle.value || "TÍTULO");
 inputSubtitle.addEventListener('input', () => dispSubtitle.innerText = inputSubtitle.value || "Subtítulo");
+
+document.getElementById('font-title').addEventListener('change', (e) => {
+    dispTitle.style.fontFamily = e.target.value;
+});
+document.getElementById('font-subtitle').addEventListener('change', (e) => {
+    dispSubtitle.style.fontFamily = e.target.value;
+});
 
 // Cambiar Posiciones
 document.getElementById('pos-title').addEventListener('change', (e) => {
@@ -56,8 +62,12 @@ document.getElementById('btn-generate').addEventListener('click', () => {
 });
 
 // --- DESCARGAR ---
-document.getElementById('btn-download').addEventListener('click', () => {
+document.getElementById('btn-download').addEventListener('click', async () => {
     if (!imageReady) return alert("Genera una imagen primero");
+    
+    // Esperar a que las fuentes externas carguen en el navegador
+    await document.fonts.ready;
+
     const canvas = document.getElementById('hidden-canvas');
     const ctx = canvas.getContext('2d');
 
@@ -68,7 +78,6 @@ document.getElementById('btn-download').addEventListener('click', () => {
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
 
-    // Función para calcular Y según posición
     const getY = (pos) => {
         if (pos === "pos-top") return 150;
         if (pos === "pos-center") return 500;
@@ -76,13 +85,15 @@ document.getElementById('btn-download').addEventListener('click', () => {
     };
 
     if (showTitle) {
-        ctx.font = "bold 70px Arial";
+        const selectedFont = document.getElementById('font-title').value;
+        ctx.font = `bold 70px "${selectedFont}"`;
         const y = getY(document.getElementById('pos-title').value);
         ctx.fillText((inputTitle.value || "TÍTULO").toUpperCase(), 400, y);
     }
 
     if (showSubtitle) {
-        ctx.font = "40px Arial";
+        const selectedFontSub = document.getElementById('font-subtitle').value;
+        ctx.font = `40px "${selectedFontSub}"`;
         const y = getY(document.getElementById('pos-subtitle').value);
         ctx.fillText(inputSubtitle.value || "Subtítulo", 400, y);
     }
@@ -92,3 +103,4 @@ document.getElementById('btn-download').addEventListener('click', () => {
     link.href = canvas.toDataURL();
     link.click();
 });
+
