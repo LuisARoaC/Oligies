@@ -1,16 +1,3 @@
-/* Importación de Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Caudex&family=Lato:wght@400;700&family=Lobster&family=Oswald:wght@500;700&family=Poppins:wght@400;700&family=Raleway:wght@400;700&display=swap');
-
-/* Ejemplo de cómo conectar tus archivos locales (Asegúrate de tener la carpeta /fonts) */
-@font-face {
-    font-family: 'CoFo Sans';
-    src: url('fonts/CoFoSans.woff2') format('woff2');
-}
-@font-face {
-    font-family: 'Abolition';
-    src: url('fonts/Abolition.woff2') format('woff2');
-}
-
 body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; display: flex; justify-content: center; padding: 20px; }
 .main-layout { display: flex; gap: 30px; flex-wrap: wrap; }
 
@@ -19,14 +6,10 @@ body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; d
     position: relative; overflow: hidden; background-size: cover; display: flex; flex-direction: column;
 }
 
-.overlay {
-    position: absolute; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.3);
-}
-
+/* Manejo de posiciones */
 .text-wrap { 
     position: absolute; width: 100%; display: flex; justify-content: center; 
-    padding: 20px; box-sizing: border-box; transition: all 0.3s; z-index: 2;
+    padding: 20px; box-sizing: border-box; transition: all 0.3s;
 }
 .pos-top { top: 10px; }
 .pos-center { top: 40%; }
@@ -37,13 +20,9 @@ body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; d
 
 .sidebar { width: 320px; display: flex; flex-direction: column; gap: 15px; }
 .group { background: #1e293b; padding: 15px; border-radius: 10px; display: flex; flex-direction: column; gap: 8px; }
-.actions { display: flex; flex-wrap: wrap; gap: 5px; }
-
-select, input { padding: 8px; border-radius: 5px; border: none; background: #334155; color: white; }
-.font-select { flex-grow: 2; min-width: 100px; }
-
+.actions { display: flex; gap: 5px; }
+select, input { padding: 8px; border-radius: 5px; border: none; flex-grow: 1; }
 button { padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; background: #3b82f6; color: white; }
 .btn-sm { padding: 5px 10px; font-size: 0.8rem; background: #64748b; }
 .secondary { background: #10b981; margin-top: 10px; }
 .loader { position: absolute; top: 45%; left: 30%; z-index: 10; background: rgba(0,0,0,0.8); padding: 10px; display: none; }
-
