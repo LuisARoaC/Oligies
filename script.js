@@ -103,4 +103,3 @@ document.getElementById('btn-download').addEventListener('click', async () => {
     link.href = canvas.toDataURL();
     link.click();
 });
-
