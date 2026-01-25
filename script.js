@@ -1,105 +1,132 @@
-const flyer = document.getElementById('flyer-preview');
-const loader = document.getElementById('loader');
-const inputPrompt = document.getElementById('input-prompt');
-const inputTitle = document.getElementById('input-title');
-const inputSubtitle = document.getElementById('input-subtitle');
+/* --- REPERTORIO MAESTRO DE GOOGLE FONTS --- */
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@700&family=Caudex:wght@700&family=Lato:wght@400;700&family=Lobster&family=Monoton&family=Oswald:wght@700&family=Pacifico&family=Playfair+Display:wght@700&family=Poppins:wght@400;700&family=Raleway:wght@700&family=Fira+Code&family=Bangers&family=Creepster&family=Press+Start+2P&family=Dancing+Script:wght@700&family=Cinzel:wght@700&display=swap');
 
-const contTitle = document.getElementById('cont-title');
-const contSubtitle = document.getElementById('cont-subtitle');
-const dispTitle = document.getElementById('display-title');
-const dispSubtitle = document.getElementById('display-subtitle');
+body { 
+    font-family: 'Poppins', sans-serif; 
+    background: #0f172a; 
+    color: white; 
+    display: flex; 
+    justify-content: center; 
+    padding: 20px; 
+    margin: 0;
+}
 
-let imageReady = null;
-let showTitle = true;
-let showSubtitle = true;
+.container { max-width: 1200px; width: 100%; }
 
-// --- SINCRONIZACIÓN DE TEXTO Y FUENTES ---
-inputTitle.addEventListener('input', () => dispTitle.innerText = inputTitle.value || "TÍTULO");
-inputSubtitle.addEventListener('input', () => dispSubtitle.innerText = inputSubtitle.value || "Subtítulo");
+.main-layout { 
+    display: flex; 
+    gap: 30px; 
+    flex-wrap: wrap; 
+    justify-content: center;
+}
 
-document.getElementById('font-title').addEventListener('change', (e) => {
-    dispTitle.style.fontFamily = e.target.value;
-});
-document.getElementById('font-subtitle').addEventListener('change', (e) => {
-    dispSubtitle.style.fontFamily = e.target.value;
-});
+/* --- VISTA PREVIA DEL FLYER --- */
+.flyer { 
+    width: 350px; 
+    height: 450px; 
+    background: #1e293b; 
+    border-radius: 15px; 
+    position: relative; 
+    overflow: hidden; 
+    background-size: cover; 
+    background-position: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
 
-// Cambiar Posiciones
-document.getElementById('pos-title').addEventListener('change', (e) => {
-    contTitle.className = `text-wrap ${e.target.value}`;
-});
-document.getElementById('pos-subtitle').addEventListener('change', (e) => {
-    contSubtitle.className = `text-wrap ${e.target.value}`;
-});
+.overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.3);
+    z-index: 1;
+}
 
-// Mostrar/Ocultar
-document.getElementById('toggle-title').addEventListener('click', (e) => {
-    showTitle = !showTitle;
-    contTitle.style.display = showTitle ? "flex" : "none";
-    e.target.innerText = showTitle ? "Ocultar" : "Mostrar";
-});
-document.getElementById('toggle-subtitle').addEventListener('click', (e) => {
-    showSubtitle = !showSubtitle;
-    contSubtitle.style.display = showSubtitle ? "flex" : "none";
-    e.target.innerText = showSubtitle ? "Ocultar" : "Mostrar";
-});
+/* --- MANEJO DE TEXTO DINÁMICO --- */
+.text-wrap { 
+    position: absolute; 
+    width: 100%; 
+    display: flex; 
+    justify-content: center; 
+    padding: 20px; 
+    box-sizing: border-box; 
+    transition: all 0.3s ease;
+    z-index: 2;
+}
 
-// --- GENERAR ---
-document.getElementById('btn-generate').addEventListener('click', () => {
-    if (!inputPrompt.value) return alert("Describe la imagen");
-    loader.style.display = "block";
-    const seed = Math.floor(Math.random() * 999999);
-    const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(inputPrompt.value)}?seed=${seed}&width=800&height=1000&nologo=true`;
+.pos-top { top: 10px; }
+.pos-center { top: 40%; }
+.pos-bottom { bottom: 10px; }
 
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
-        imageReady = img;
-        flyer.style.backgroundImage = `url('${url}')`;
-        loader.style.display = "none";
-    };
-    img.src = url;
-});
+.text-wrap h2, .text-wrap p { 
+    margin: 0; 
+    text-shadow: 2px 2px 10px rgba(0,0,0,0.8); 
+    text-align: center; 
+    word-break: break-word;
+}
 
-// --- DESCARGAR ---
-document.getElementById('btn-download').addEventListener('click', async () => {
-    if (!imageReady) return alert("Genera una imagen primero");
-    
-    // Esperar a que las fuentes externas carguen en el navegador
-    await document.fonts.ready;
+#display-title { font-size: 2.2rem; line-height: 1.1; }
+#display-subtitle { font-size: 1.2rem; }
 
-    const canvas = document.getElementById('hidden-canvas');
-    const ctx = canvas.getContext('2d');
+/* --- SIDEBAR Y CONTROLES --- */
+.sidebar { width: 350px; display: flex; flex-direction: column; gap: 15px; }
 
-    ctx.drawImage(imageReady, 0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "rgba(0,0,0,0.3)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+.group { 
+    background: #1e293b; 
+    padding: 15px; 
+    border-radius: 10px; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 10px; 
+    border: 1px solid #334155;
+}
 
-    ctx.fillStyle = "white";
-    ctx.textAlign = "center";
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
-    const getY = (pos) => {
-        if (pos === "pos-top") return 150;
-        if (pos === "pos-center") return 500;
-        return 850;
-    };
+label { font-size: 0.9rem; color: #94a3b8; font-weight: bold; }
 
-    if (showTitle) {
-        const selectedFont = document.getElementById('font-title').value;
-        ctx.font = `bold 70px "${selectedFont}"`;
-        const y = getY(document.getElementById('pos-title').value);
-        ctx.fillText((inputTitle.value || "TÍTULO").toUpperCase(), 400, y);
-    }
+select, input { 
+    padding: 10px; 
+    border-radius: 6px; 
+    border: 1px solid #475569; 
+    background: #0f172a; 
+    color: white; 
+    font-size: 0.9rem;
+    outline: none;
+}
 
-    if (showSubtitle) {
-        const selectedFontSub = document.getElementById('font-subtitle').value;
-        ctx.font = `40px "${selectedFontSub}"`;
-        const y = getY(document.getElementById('pos-subtitle').value);
-        ctx.fillText(inputSubtitle.value || "Subtítulo", 400, y);
-    }
+select:focus, input:focus { border-color: #3b82f6; }
 
-    const link = document.createElement('a');
-    link.download = "flyer-ia.png";
-    link.href = canvas.toDataURL();
-    link.click();
-});
+button { 
+    padding: 12px; 
+    border: none; 
+    border-radius: 6px; 
+    cursor: pointer; 
+    font-weight: bold; 
+    transition: 0.2s;
+}
+
+#btn-generate { background: #3b82f6; color: white; }
+#btn-generate:hover { background: #2563eb; }
+
+.btn-sm { padding: 6px 12px; font-size: 0.8rem; background: #475569; color: white; }
+
+.secondary { 
+    background: #10b981; 
+    color: white; 
+    font-size: 1.1rem; 
+    margin-top: 10px; 
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+}
+.secondary:hover { background: #059669; }
+
+.loader { 
+    position: absolute; 
+    top: 50%; left: 50%; 
+    transform: translate(-50%, -50%);
+    z-index: 20; 
+    background: rgba(0,0,0,0.85); 
+    padding: 15px 25px; 
+    border-radius: 30px;
+    display: none; 
+    font-weight: bold;
+    border: 1px solid #3b82f6;
+}
