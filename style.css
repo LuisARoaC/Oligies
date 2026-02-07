@@ -39,5 +39,3 @@ button { padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-
 .btn-sm { padding: 5px 10px; font-size: 0.8rem; background: #64748b; }
 .secondary { background: #10b981; margin-top: 10px; }
 .loader { position: absolute; top: 45%; left: 30%; z-index: 10; background: rgba(0,0,0,0.8); padding: 10px; display: none; }
-
-
