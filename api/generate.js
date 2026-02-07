@@ -1,5 +1,4 @@
 export default async function handler(req, res) {
-    // 1. Configuración de cabeceras para permitir peticiones desde tu frontend
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     
@@ -7,13 +6,12 @@ export default async function handler(req, res) {
     const HF_TOKEN = process.env.HUGGINGFACE_TOKEN;
 
     if (!prompt) {
-        return res.status(400).json({ error: "Falta el prompt en la consulta." });
+        return res.status(400).json({ error: "Falta el prompt." });
     }
 
-    // Usaremos un modelo de alta calidad pero con mejor disponibilidad
-    const MODEL_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0";
+    // CAMBIO CLAVE: Usamos la versión 1.5 que es mucho más estable y rápida
+    const MODEL_URL = "https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5";
 
-    // Intentaremos hasta 3 veces si el servidor responde que está cargando (503)
     for (let i = 0; i < 3; i++) {
         try {
             const response = await fetch(MODEL_URL, {
@@ -25,25 +23,20 @@ export default async function handler(req, res) {
                 body: JSON.stringify({ 
                     inputs: prompt,
                     options: { 
-                        wait_for_model: true, // Indica a HF que si el modelo está dormido, lo despierte
-                        use_cache: false      // Obliga a generar una imagen nueva cada vez
+                        wait_for_model: true,
+                        use_cache: false 
                     }
                 }),
             });
 
-            // Si el código es 503, es que el modelo se está cargando en los servidores de HF
-            if (response.status === 503) {
-                console.log(`Reintento ${i + 1}: El modelo está cargando...`);
-                await new Promise(resolve => setTimeout(resolve, 3000)); // Esperamos 3 segundos
+            if (response.status === 503 || response.status === 429) {
+                // Si está cargando o hay demasiadas peticiones, esperamos y reintentamos
+                await new Promise(resolve => setTimeout(resolve, 2000));
                 continue; 
             }
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`HF Error: ${response.status} - ${errorText}`);
-            }
+            if (!response.ok) throw new Error("Error en servidor");
 
-            // Procesamos la imagen binaria a Base64
             const arrayBuffer = await response.arrayBuffer();
             const buffer = Buffer.from(arrayBuffer);
             const base64Image = buffer.toString('base64');
@@ -53,10 +46,9 @@ export default async function handler(req, res) {
             });
 
         } catch (error) {
-            // Si después de 3 intentos sigue fallando, enviamos el error final
             if (i === 2) {
                 return res.status(500).json({ 
-                    error: "La IA está muy saturada en este momento. Intenta de nuevo en unos segundos." 
+                    error: "Servidores saturados. Intenta con un prompt más corto o espera 5 segundos." 
                 });
             }
         }
