@@ -6,42 +6,47 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputPrompt = document.getElementById('input-prompt');
     const displayTitle = document.getElementById('display-title');
     const displaySubtitle = document.getElementById('display-subtitle');
+    
+    // Guardamos la URL de la imagen actual para la descarga
+    let currentImageBase64 = "";
 
-    // --- GENERACIÓN CON DICEBEAR ---
-    btnGenerate.addEventListener('click', () => {
-        const seed = inputPrompt.value.trim() || Math.floor(Math.random() * 100000);
-        
+    // --- GENERACIÓN CON IA (BACKEND VERCEL) ---
+    btnGenerate.addEventListener('click', async () => {
+        const prompt = inputPrompt.value.trim();
+        if (!prompt) return alert("Escribe qué quieres generar (ej: 'cyberpunk city' o 'sunset beach')");
+
         loader.style.display = 'block';
+        loader.innerText = "La IA gratuita está trabajando...";
         btnGenerate.disabled = true;
 
-        // Usamos la API de DiceBear con el estilo 'shapes' (figuras geométricas)
-        // Agregamos parámetros para que el fondo sea colorido y moderno
-        const style = 'shapes';
-        const url = `https://api.dicebear.com/7.x/${style}/svg?seed=${encodeURIComponent(seed)}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
+        try {
+            // Llamamos a tu API en Vercel
+            const response = await fetch(`/api/generate?prompt=${encodeURIComponent(prompt)}`);
+            const data = await response.json();
 
-        // Creamos un objeto imagen para cargar el SVG antes de mostrarlo
-        const img = new Image();
-        
-        // El truco para que el navegador no bloquee el diseño:
-        img.crossOrigin = "anonymous"; 
-        
-        img.onload = function() {
-            // Aplicamos al contenedor del flyer
-            flyerPreview.style.backgroundImage = `url('${url}')`;
-            flyerPreview.style.backgroundSize = "cover";
-            
+            if (data.url) {
+                const img = new Image();
+                img.crossOrigin = "anonymous"; // Evita problemas de seguridad
+                img.src = data.url;
+
+                img.onload = () => {
+                    flyerPreview.style.backgroundImage = `url('${data.url}')`;
+                    flyerPreview.style.backgroundSize = "cover";
+                    flyerPreview.style.backgroundPosition = "center";
+                    
+                    currentImageBase64 = data.url; // Guardamos para la descarga
+                    loader.style.display = 'none';
+                    btnGenerate.disabled = false;
+                };
+            } else {
+                throw new Error(data.error || "No se recibió la imagen");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Aviso: " + error.message);
             loader.style.display = 'none';
             btnGenerate.disabled = false;
-            console.log("Fondo cargado correctamente");
-        };
-
-        img.onerror = function() {
-            console.error("Error cargando DiceBear");
-            loader.innerText = "Error de conexión";
-            btnGenerate.disabled = false;
-        };
-
-        img.src = url;
+        }
     });
 
     // --- ACTUALIZACIÓN DE TEXTO EN TIEMPO REAL ---
@@ -60,22 +65,53 @@ document.addEventListener('DOMContentLoaded', () => {
         const fontSub = document.getElementById('font-subtitle').value;
         const posSub = document.getElementById('pos-subtitle').value;
 
-        // Título
         displayTitle.style.fontFamily = fontTitle;
         document.getElementById('cont-title').className = `text-wrap ${posTitle}`;
 
-        // Subtítulo
         displaySubtitle.style.fontFamily = fontSub;
         document.getElementById('cont-subtitle').className = `text-wrap ${posSub}`;
     };
 
-    // Escuchar cambios en todos los selects
     document.querySelectorAll('select').forEach(select => {
         select.addEventListener('change', updateStyles);
     });
 
-    // --- DESCARGAR FLYER ---
+    // --- DESCARGAR FLYER (AHORA FUNCIONAL) ---
     document.getElementById('btn-download').addEventListener('click', () => {
-        alert("Para descargar en alta calidad con fondos SVG, te recomiendo usar la función 'Imprimir a PDF' o captura de pantalla, ya que los navegadores restringen la descarga de SVGs mediante Canvas por seguridad.");
+        if (!currentImageBase64) return alert("Primero genera una imagen de fondo.");
+
+        // Creamos un canvas oculto de 800x1000 (tamaño flyer)
+        const canvas = document.createElement('canvas');
+        canvas.width = 800;
+        canvas.height = 1000;
+        const ctx = canvas.getContext('2d');
+
+        const bgImg = new Image();
+        bgImg.src = currentImageBase64;
+        
+        bgImg.onload = () => {
+            // 1. Dibujar el fondo
+            ctx.drawImage(bgImg, 0, 0, 800, 1000);
+
+            // 2. Capa de oscurecimiento (opcional, para que el texto resalte)
+            ctx.fillStyle = "rgba(0,0,0,0.2)";
+            ctx.fillRect(0, 0, 800, 1000);
+
+            // 3. Dibujar Título
+            ctx.fillStyle = "white";
+            ctx.textAlign = "center";
+            ctx.font = `bold 70px ${document.getElementById('font-title').value}`;
+            // Ajustamos la posición según el selector
+            let yPos = 500; 
+            if(document.getElementById('pos-title').value.includes('top')) yPos = 200;
+            if(document.getElementById('pos-title').value.includes('bottom')) yPos = 800;
+            ctx.fillText(displayTitle.innerText, 400, yPos);
+
+            // 4. Descargar
+            const link = document.createElement('a');
+            link.download = 'mi-flyer-ia.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        };
     });
 });
