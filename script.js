@@ -1,132 +1,94 @@
-/* --- REPERTORIO MAESTRO DE GOOGLE FONTS --- */
-@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@700&family=Caudex:wght@700&family=Lato:wght@400;700&family=Lobster&family=Monoton&family=Oswald:wght@700&family=Pacifico&family=Playfair+Display:wght@700&family=Poppins:wght@400;700&family=Raleway:wght@700&family=Fira+Code&family=Bangers&family=Creepster&family=Press+Start+2P&family=Dancing+Script:wght@700&family=Cinzel:wght@700&display=swap');
+document.addEventListener('DOMContentLoaded', () => {
+    // --- REFERENCIAS DE ELEMENTOS ---
+    const btnGenerate = document.getElementById('btn-generate');
+    const inputPrompt = document.getElementById('input-prompt');
+    const flyerPreview = document.getElementById('flyer-preview');
+    const loader = document.getElementById('loader');
 
-body { 
-    font-family: 'Poppins', sans-serif; 
-    background: #0f172a; 
-    color: white; 
-    display: flex; 
-    justify-content: center; 
-    padding: 20px; 
-    margin: 0;
-}
+    // Título
+    const inputTitle = document.getElementById('input-title');
+    const displayTitle = document.getElementById('display-title');
+    const fontTitle = document.getElementById('font-title');
+    const posTitle = document.getElementById('pos-title');
+    const contTitle = document.getElementById('cont-title');
+    const btnToggleTitle = document.getElementById('toggle-title');
 
-.container { max-width: 1200px; width: 100%; }
+    // Subtítulo
+    const inputSubtitle = document.getElementById('input-subtitle');
+    const displaySubtitle = document.getElementById('display-subtitle');
+    const fontSubtitle = document.getElementById('font-subtitle');
+    const posSubtitle = document.getElementById('pos-subtitle');
+    const contSubtitle = document.getElementById('cont-subtitle');
+    const btnToggleSubtitle = document.getElementById('toggle-subtitle');
 
-.main-layout { 
-    display: flex; 
-    gap: 30px; 
-    flex-wrap: wrap; 
-    justify-content: center;
-}
+    // --- LÓGICA DE ACTUALIZACIÓN DE TEXTO ---
 
-/* --- VISTA PREVIA DEL FLYER --- */
-.flyer { 
-    width: 350px; 
-    height: 450px; 
-    background: #1e293b; 
-    border-radius: 15px; 
-    position: relative; 
-    overflow: hidden; 
-    background-size: cover; 
-    background-position: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
+    // Cambiar contenido de texto
+    inputTitle.addEventListener('input', () => {
+        displayTitle.innerText = inputTitle.value || "TÍTULO";
+    });
 
-.overlay {
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.3);
-    z-index: 1;
-}
+    inputSubtitle.addEventListener('input', () => {
+        displaySubtitle.innerText = inputSubtitle.value || "Subtítulo";
+    });
 
-/* --- MANEJO DE TEXTO DINÁMICO --- */
-.text-wrap { 
-    position: absolute; 
-    width: 100%; 
-    display: flex; 
-    justify-content: center; 
-    padding: 20px; 
-    box-sizing: border-box; 
-    transition: all 0.3s ease;
-    z-index: 2;
-}
+    // Cambiar tipografías
+    fontTitle.addEventListener('change', () => {
+        displayTitle.style.fontFamily = fontTitle.value;
+    });
 
-.pos-top { top: 10px; }
-.pos-center { top: 40%; }
-.pos-bottom { bottom: 10px; }
+    fontSubtitle.addEventListener('change', () => {
+        displaySubtitle.style.fontFamily = fontSubtitle.value;
+    });
 
-.text-wrap h2, .text-wrap p { 
-    margin: 0; 
-    text-shadow: 2px 2px 10px rgba(0,0,0,0.8); 
-    text-align: center; 
-    word-break: break-word;
-}
+    // Cambiar posiciones (Manejo de clases CSS)
+    posTitle.addEventListener('change', () => {
+        contTitle.className = `text-wrap ${posTitle.value}`;
+    });
 
-#display-title { font-size: 2.2rem; line-height: 1.1; }
-#display-subtitle { font-size: 1.2rem; }
+    posSubtitle.addEventListener('change', () => {
+        contSubtitle.className = `text-wrap ${posSubtitle.value}`;
+    });
 
-/* --- SIDEBAR Y CONTROLES --- */
-.sidebar { width: 350px; display: flex; flex-direction: column; gap: 15px; }
+    // Botones Ocultar/Mostrar
+    btnToggleTitle.onclick = () => toggleVisibility(contTitle, btnToggleTitle);
+    btnToggleSubtitle.onclick = () => toggleVisibility(contSubtitle, btnToggleSubtitle);
 
-.group { 
-    background: #1e293b; 
-    padding: 15px; 
-    border-radius: 10px; 
-    display: flex; 
-    flex-direction: column; 
-    gap: 10px; 
-    border: 1px solid #334155;
-}
+    function toggleVisibility(element, button) {
+        if (element.style.display === 'none') {
+            element.style.display = 'flex';
+            button.innerText = "Ocultar";
+        } else {
+            element.style.display = 'none';
+            button.innerText = "Mostrar";
+        }
+    }
 
-.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    // --- LÓGICA DE GENERACIÓN DE IMAGEN (IA) ---
 
-label { font-size: 0.9rem; color: #94a3b8; font-weight: bold; }
+    btnGenerate.addEventListener('click', async () => {
+        const prompt = inputPrompt.value.trim();
+        if (!prompt) return alert("Por favor, escribe un prompt para la imagen.");
 
-select, input { 
-    padding: 10px; 
-    border-radius: 6px; 
-    border: 1px solid #475569; 
-    background: #0f172a; 
-    color: white; 
-    font-size: 0.9rem;
-    outline: none;
-}
+        // Mostrar cargador
+        loader.style.display = 'block';
 
-select:focus, input:focus { border-color: #3b82f6; }
+        // Usamos Pollinations.ai (una API gratuita y rápida que no requiere registro)
+        // Ideal para prototipos de flyers con IA
+        const seed = Math.floor(Math.random() * 1000000);
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=800&height=1000&seed=${seed}&nologo=true`;
 
-button { 
-    padding: 12px; 
-    border: none; 
-    border-radius: 6px; 
-    cursor: pointer; 
-    font-weight: bold; 
-    transition: 0.2s;
-}
-
-#btn-generate { background: #3b82f6; color: white; }
-#btn-generate:hover { background: #2563eb; }
-
-.btn-sm { padding: 6px 12px; font-size: 0.8rem; background: #475569; color: white; }
-
-.secondary { 
-    background: #10b981; 
-    color: white; 
-    font-size: 1.1rem; 
-    margin-top: 10px; 
-    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
-}
-.secondary:hover { background: #059669; }
-
-.loader { 
-    position: absolute; 
-    top: 50%; left: 50%; 
-    transform: translate(-50%, -50%);
-    z-index: 20; 
-    background: rgba(0,0,0,0.85); 
-    padding: 15px 25px; 
-    border-radius: 30px;
-    display: none; 
-    font-weight: bold;
-    border: 1px solid #3b82f6;
-}
+        // Precargar la imagen para que no parpadee
+        const img = new Image();
+        img.src = imageUrl;
+        img.onload = () => {
+            flyerPreview.style.backgroundImage = `url('${imageUrl}')`;
+            loader.style.display = 'none';
+        };
+        
+        img.onerror = () => {
+            loader.style.display = 'none';
+            alert("Error al generar la imagen. Intenta con un prompt diferente.");
+        };
+    });
+});
