@@ -1,0 +1,17 @@
+// api/generate.js
+export default async function handler(req, res) {
+    const { prompt } = req.query;
+    
+    // Aquí podrías añadir tu API Key si la tienes
+    // const apiKey = process.env.POLLINATIONS_API_KEY; 
+
+    const width = 800;
+    const height = 1000;
+    const model = 'flux';
+    const seed = Math.floor(Math.random() * 1000000);
+
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${width}&height=${height}&model=${model}&seed=${seed}&nologo=true`;
+
+    // Devolvemos la URL a tu frontend
+    res.status(200).json({ url: imageUrl });
+}
