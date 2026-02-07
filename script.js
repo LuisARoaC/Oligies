@@ -1,94 +1,156 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- REFERENCIAS DE ELEMENTOS ---
+    // --- ELEMENTOS DEL DOM ---
     const btnGenerate = document.getElementById('btn-generate');
-    const inputPrompt = document.getElementById('input-prompt');
+    const btnDownload = document.getElementById('btn-download');
     const flyerPreview = document.getElementById('flyer-preview');
     const loader = document.getElementById('loader');
-
-    // Título
+    
+    // Inputs de Texto
+    const inputPrompt = document.getElementById('input-prompt');
     const inputTitle = document.getElementById('input-title');
+    const inputSubtitle = document.getElementById('input-subtitle');
+    
+    // Displays de Texto
     const displayTitle = document.getElementById('display-title');
+    const displaySubtitle = document.getElementById('display-subtitle');
+    
+    // Controles de Estilo
     const fontTitle = document.getElementById('font-title');
     const posTitle = document.getElementById('pos-title');
-    const contTitle = document.getElementById('cont-title');
-    const btnToggleTitle = document.getElementById('toggle-title');
-
-    // Subtítulo
-    const inputSubtitle = document.getElementById('input-subtitle');
-    const displaySubtitle = document.getElementById('display-subtitle');
+    const toggleTitle = document.getElementById('toggle-title');
+    
     const fontSubtitle = document.getElementById('font-subtitle');
     const posSubtitle = document.getElementById('pos-subtitle');
-    const contSubtitle = document.getElementById('cont-subtitle');
-    const btnToggleSubtitle = document.getElementById('toggle-subtitle');
+    const toggleSubtitle = document.getElementById('toggle-subtitle');
 
-    // --- LÓGICA DE ACTUALIZACIÓN DE TEXTO ---
+    // --- LÓGICA DE ACTUALIZACIÓN EN TIEMPO REAL ---
 
-    // Cambiar contenido de texto
-    inputTitle.addEventListener('input', () => {
-        displayTitle.innerText = inputTitle.value || "TÍTULO";
+    // Actualizar Texto
+    inputTitle.addEventListener('input', (e) => {
+        displayTitle.innerText = e.target.value.toUpperCase() || "TÍTULO";
     });
 
-    inputSubtitle.addEventListener('input', () => {
-        displaySubtitle.innerText = inputSubtitle.value || "Subtítulo";
+    inputSubtitle.addEventListener('input', (e) => {
+        displaySubtitle.innerText = e.target.value || "Subtítulo";
     });
 
-    // Cambiar tipografías
-    fontTitle.addEventListener('change', () => {
+    // Actualizar Tipografías y Posiciones
+    const updateStyles = () => {
+        // Título
         displayTitle.style.fontFamily = fontTitle.value;
-    });
-
-    fontSubtitle.addEventListener('change', () => {
+        document.getElementById('cont-title').className = `text-wrap ${posTitle.value}`;
+        
+        // Subtítulo
         displaySubtitle.style.fontFamily = fontSubtitle.value;
+        document.getElementById('cont-subtitle').className = `text-wrap ${posSubtitle.value}`;
+    };
+
+    [fontTitle, posTitle, fontSubtitle, posSubtitle].forEach(el => {
+        el.addEventListener('change', updateStyles);
     });
 
-    // Cambiar posiciones (Manejo de clases CSS)
-    posTitle.addEventListener('change', () => {
-        contTitle.className = `text-wrap ${posTitle.value}`;
+    // Botones de Ocultar/Mostrar
+    toggleTitle.addEventListener('click', () => {
+        displayTitle.style.display = displayTitle.style.display === 'none' ? 'block' : 'none';
+        toggleTitle.innerText = displayTitle.style.display === 'none' ? 'Mostrar' : 'Ocultar';
     });
 
-    posSubtitle.addEventListener('change', () => {
-        contSubtitle.className = `text-wrap ${posSubtitle.value}`;
+    toggleSubtitle.addEventListener('click', () => {
+        displaySubtitle.style.display = displaySubtitle.style.display === 'none' ? 'block' : 'none';
+        toggleSubtitle.innerText = displaySubtitle.style.display === 'none' ? 'Mostrar' : 'Ocultar';
     });
 
-    // Botones Ocultar/Mostrar
-    btnToggleTitle.onclick = () => toggleVisibility(contTitle, btnToggleTitle);
-    btnToggleSubtitle.onclick = () => toggleVisibility(contSubtitle, btnToggleSubtitle);
-
-    function toggleVisibility(element, button) {
-        if (element.style.display === 'none') {
-            element.style.display = 'flex';
-            button.innerText = "Ocultar";
-        } else {
-            element.style.display = 'none';
-            button.innerText = "Mostrar";
-        }
-    }
-
-    // --- LÓGICA DE GENERACIÓN DE IMAGEN (IA) ---
+    // --- GENERACIÓN DE IMAGEN (IA) ---
 
     btnGenerate.addEventListener('click', async () => {
         const prompt = inputPrompt.value.trim();
-        if (!prompt) return alert("Por favor, escribe un prompt para la imagen.");
+        if (!prompt) return alert("Por favor, escribe una descripción para la imagen.");
 
-        // Mostrar cargador
         loader.style.display = 'block';
+        btnGenerate.disabled = true;
 
-        // Usamos Pollinations.ai (una API gratuita y rápida que no requiere registro)
-        // Ideal para prototipos de flyers con IA
+        // Usamos Pollinations AI (Gratis y sin necesidad de API Key compleja para GET)
+        const width = 800;
+        const height = 1000;
         const seed = Math.floor(Math.random() * 1000000);
-        const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=800&height=1000&seed=${seed}&nologo=true`;
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${width}&height=${height}&seed=${seed}&nologo=true`;
 
-        // Precargar la imagen para que no parpadee
-        const img = new Image();
-        img.src = imageUrl;
-        img.onload = () => {
-            flyerPreview.style.backgroundImage = `url('${imageUrl}')`;
+        try {
+            // Pre-cargamos la imagen para que no parpadee
+            const img = new Image();
+            img.crossOrigin = "anonymous"; // Importante para poder descargar después
+            img.src = imageUrl;
+            
+            img.onload = () => {
+                flyerPreview.style.backgroundImage = `url('${imageUrl}')`;
+                loader.style.display = 'none';
+                btnGenerate.disabled = false;
+            };
+        } catch (error) {
+            console.error("Error generando imagen:", error);
+            alert("Hubo un error al generar la imagen.");
             loader.style.display = 'none';
-        };
+            btnGenerate.disabled = false;
+        }
+    });
+
+    // --- FUNCIÓN DE DESCARGA (CANVAS) ---
+
+    btnDownload.addEventListener('click', () => {
+        const canvas = document.getElementById('hidden-canvas');
+        const ctx = canvas.getContext('2d');
         
-        img.onerror = () => {
-            loader.style.display = 'none';
-            alert("Error al generar la imagen. Intenta con un prompt diferente.");
+        // 1. Dibujar el fondo (Imagen de la IA)
+        const bgImg = new Image();
+        bgImg.crossOrigin = "anonymous";
+        
+        // Extraer la URL del background-image
+        const style = window.getComputedStyle(flyerPreview).backgroundImage;
+        const url = style.replace(/url\(['"]?(.*?)['"]?\)/i, '$1');
+
+        if (!url || url === 'none') {
+            return alert("Primero genera una imagen de fondo.");
+        }
+
+        bgImg.src = url;
+        bgImg.onload = () => {
+            // Dibujar imagen
+            ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+            
+            // Capa de oscurecimiento (overlay)
+            ctx.fillStyle = "rgba(0,0,0,0.3)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 2. Configurar y dibujar Título
+            if (displayTitle.style.display !== 'none') {
+                ctx.fillStyle = "white";
+                ctx.textAlign = "center";
+                ctx.font = `bold 70px ${fontTitle.value}`;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = "black";
+                
+                let yPos = canvas.height / 2;
+                if (posTitle.value === 'pos-top') yPos = 150;
+                if (posTitle.value === 'pos-bottom') yPos = canvas.height - 150;
+                
+                ctx.fillText(displayTitle.innerText, canvas.width / 2, yPos);
+            }
+
+            // 3. Configurar y dibujar Subtítulo
+            if (displaySubtitle.style.display !== 'none') {
+                ctx.font = `40px ${fontSubtitle.value}`;
+                let ySubPos = canvas.height - 80;
+                if (posSubtitle.value === 'pos-top') ySubPos = 220;
+                if (posSubtitle.value === 'pos-center') ySubPos = (canvas.height / 2) + 80;
+                
+                ctx.fillText(displaySubtitle.innerText, canvas.width / 2, ySubPos);
+            }
+
+            // 4. Descargar
+            const link = document.createElement('a');
+            link.download = 'mi-flyer-ia.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
         };
     });
 });
