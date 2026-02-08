@@ -8,39 +8,44 @@ document.addEventListener('DOMContentLoaded', () => {
     const displaySubtitle = document.getElementById('display-subtitle');
     
     // Guardamos la URL de la imagen actual para la descarga
-    let currentImageBase64 = "";
+    let currentImageUrl = "";
 
-    // --- GENERACIÓN CON IA (BACKEND VERCEL) ---
+    // --- GENERACIÓN CON IA (DIRECTA A POLLINATIONS) ---
     btnGenerate.addEventListener('click', async () => {
         const prompt = inputPrompt.value.trim();
-        if (!prompt) return alert("Escribe qué quieres generar (ej: 'cyberpunk city' o 'sunset beach')");
+        if (!prompt) return alert("Escribe qué quieres generar (ej: 'cyberpunk city')");
 
         loader.style.display = 'block';
-        loader.innerText = "La IA gratuita está trabajando...";
+        loader.innerText = "La IA está trabajando...";
         btnGenerate.disabled = true;
 
         try {
-            // Llamamos a tu API en Vercel
-            const response = await fetch(`/api/generate?prompt=${encodeURIComponent(prompt)}`);
-            const data = await response.json();
+            // Lógica fusionada: Generamos la URL directamente
+            const seed = Math.floor(Math.random() * 999999);
+            const model = 'flux'; // Puedes cambiarlo a 'turbo' si quieres más velocidad
+            
+            // Construimos la URL de Pollinations
+            const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=800&height=1000&model=${model}&seed=${seed}&nologo=true`;
 
-            if (data.url) {
-                const img = new Image();
-                img.crossOrigin = "anonymous"; // Evita problemas de seguridad
-                img.src = data.url;
+            // Pre-cargamos la imagen para asegurarnos de que existe antes de mostrarla
+            const img = new Image();
+            img.crossOrigin = "anonymous"; 
+            img.src = imageUrl;
 
-                img.onload = () => {
-                    flyerPreview.style.backgroundImage = `url('${data.url}')`;
-                    flyerPreview.style.backgroundSize = "cover";
-                    flyerPreview.style.backgroundPosition = "center";
-                    
-                    currentImageBase64 = data.url; // Guardamos para la descarga
-                    loader.style.display = 'none';
-                    btnGenerate.disabled = false;
-                };
-            } else {
-                throw new Error(data.error || "No se recibió la imagen");
-            }
+            img.onload = () => {
+                flyerPreview.style.backgroundImage = `url('${imageUrl}')`;
+                flyerPreview.style.backgroundSize = "cover";
+                flyerPreview.style.backgroundPosition = "center";
+                
+                currentImageUrl = imageUrl; // Guardamos la URL para el canvas de descarga
+                loader.style.display = 'none';
+                btnGenerate.disabled = false;
+            };
+
+            img.onerror = () => {
+                throw new Error("Error al cargar la imagen desde el servidor de IA.");
+            };
+
         } catch (error) {
             console.error("Error:", error);
             alert("Aviso: " + error.message);
@@ -76,40 +81,51 @@ document.addEventListener('DOMContentLoaded', () => {
         select.addEventListener('change', updateStyles);
     });
 
-    // --- DESCARGAR FLYER (AHORA FUNCIONAL) ---
+    // --- DESCARGAR FLYER ---
     document.getElementById('btn-download').addEventListener('click', () => {
-        if (!currentImageBase64) return alert("Primero genera una imagen de fondo.");
+        if (!currentImageUrl) return alert("Primero genera una imagen de fondo.");
 
-        // Creamos un canvas oculto de 800x1000 (tamaño flyer)
         const canvas = document.createElement('canvas');
         canvas.width = 800;
         canvas.height = 1000;
         const ctx = canvas.getContext('2d');
 
         const bgImg = new Image();
-        bgImg.src = currentImageBase64;
+        bgImg.crossOrigin = "anonymous"; // Importante para permitir la descarga
+        bgImg.src = currentImageUrl;
         
         bgImg.onload = () => {
             // 1. Dibujar el fondo
             ctx.drawImage(bgImg, 0, 0, 800, 1000);
 
-            // 2. Capa de oscurecimiento (opcional, para que el texto resalte)
-            ctx.fillStyle = "rgba(0,0,0,0.2)";
+            // 2. Capa de oscurecimiento suave
+            ctx.fillStyle = "rgba(0,0,0,0.3)";
             ctx.fillRect(0, 0, 800, 1000);
 
             // 3. Dibujar Título
             ctx.fillStyle = "white";
             ctx.textAlign = "center";
-            ctx.font = `bold 70px ${document.getElementById('font-title').value}`;
-            // Ajustamos la posición según el selector
-            let yPos = 500; 
-            if(document.getElementById('pos-title').value.includes('top')) yPos = 200;
-            if(document.getElementById('pos-title').value.includes('bottom')) yPos = 800;
-            ctx.fillText(displayTitle.innerText, 400, yPos);
+            ctx.font = `bold 80px ${document.getElementById('font-title').value}`;
+            
+            let yPosTitle = 500; 
+            const posTitleValue = document.getElementById('pos-title').value;
+            if(posTitleValue.includes('top')) yPosTitle = 200;
+            if(posTitleValue.includes('bottom')) yPosTitle = 800;
+            
+            ctx.fillText(displayTitle.innerText, 400, yPosTitle);
 
-            // 4. Descargar
+            // 4. Dibujar Subtítulo (añadido para que no falte en la descarga)
+            ctx.font = `40px ${document.getElementById('font-subtitle').value}`;
+            let yPosSub = yPosTitle + 70;
+            const posSubValue = document.getElementById('pos-subtitle').value;
+            if(posSubValue.includes('top')) yPosSub = 280;
+            if(posSubValue.includes('bottom')) yPosSub = 880;
+
+            ctx.fillText(displaySubtitle.innerText, 400, yPosSub);
+
+            // 5. Ejecutar descarga
             const link = document.createElement('a');
-            link.download = 'mi-flyer-ia.png';
+            link.download = `flyer-${Date.now()}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
         };
