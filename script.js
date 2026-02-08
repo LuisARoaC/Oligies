@@ -7,59 +7,56 @@ document.addEventListener('DOMContentLoaded', () => {
     const displayTitle = document.getElementById('display-title');
     const displaySubtitle = document.getElementById('display-subtitle');
     
-    const btnHide = document.getElementById('btn-hide');
-    const panelSettings = document.getElementById('panel-settings');
+    // Referencias para ocultar elementos individuales (Corregido según tu HTML)
+    const btnToggleTitle = document.getElementById('toggle-title');
+    const btnToggleSubtitle = document.getElementById('toggle-subtitle');
     
     let currentImageUrl = "";
 
-    // --- LÓGICA FUSIONADA: OCULTAR PANEL Y TEXTOS ---
-    if (btnHide) {
-        btnHide.addEventListener('click', () => {
+    // --- LÓGICA PARA OCULTAR TÍTULO ---
+    if (btnToggleTitle) {
+        btnToggleTitle.addEventListener('click', () => {
             const contTitle = document.getElementById('cont-title');
-            const contSub = document.getElementById('cont-subtitle');
-            
-            // Verificamos si el panel de ajustes está visible
-            // Usamos getComputedStyle para mayor precisión
-            const panelVisible = panelSettings && window.getComputedStyle(panelSettings).display !== 'none';
-
-            if (panelVisible) {
-                // 1. Ocultar Panel de ajustes
-                if(panelSettings) panelSettings.style.display = 'none';
-                
-                // 2. Ocultar Textos sobre el flyer
-                if(contTitle) contTitle.style.visibility = 'hidden';
-                if(contSub) contSub.style.visibility = 'hidden';
-                
-                btnHide.innerText = 'Mostrar Todo';
+            if (contTitle.style.visibility === 'hidden') {
+                contTitle.style.visibility = 'visible';
+                btnToggleTitle.innerText = 'Ocultar';
             } else {
-                // 1. Mostrar Panel de ajustes
-                if(panelSettings) panelSettings.style.display = 'block';
-                
-                // 2. Mostrar Textos sobre el flyer
-                if(contTitle) contTitle.style.visibility = 'visible';
-                if(contSub) contSub.style.visibility = 'visible';
-                
-                btnHide.innerText = 'Ocultar Todo';
+                contTitle.style.visibility = 'hidden';
+                btnToggleTitle.innerText = 'Mostrar';
             }
         });
     }
 
-    // --- GENERACIÓN CON IA (ÓRDENES ESTRICTAS DE FLYER) ---
+    // --- LÓGICA PARA OCULTAR SUBTÍTULO ---
+    if (btnToggleSubtitle) {
+        btnToggleSubtitle.addEventListener('click', () => {
+            const contSub = document.getElementById('cont-subtitle');
+            if (contSub.style.visibility === 'hidden') {
+                contSub.style.visibility = 'visible';
+                btnToggleSubtitle.innerText = 'Ocultar';
+            } else {
+                contSub.style.visibility = 'hidden';
+                btnToggleSubtitle.innerText = 'Mostrar';
+            }
+        });
+    }
+
+    // --- GENERACIÓN CON IA (ÓRDENES ESTRICTAS: SOLO FLYERS) ---
     btnGenerate.addEventListener('click', async () => {
         const userPrompt = inputPrompt.value.trim();
         if (!userPrompt) return alert("Escribe qué quieres generar para el flyer");
 
         loader.style.display = 'block';
-        loader.innerText = "Diseñando tu flyer exclusivo...";
+        loader.innerText = "Diseñando flyer exclusivo...";
         btnGenerate.disabled = true;
 
         try {
             const seed = Math.floor(Math.random() * 999999);
             const model = 'flux'; 
             
-            // Instrucción de personalidad única para la IA
-            const systemRules = "Professional graphic design flyer, high quality commercial poster template, marketing aesthetic, no real human faces, vector style backgrounds, ";
-            const appConstraint = "THIS APP IS EXCLUSIVELY FOR FLYER GENERATION. SUBJECT: ";
+            // --- INSTRUCCIONES DE IDENTIDAD PARA LA IA ---
+            const systemRules = "Professional flyer graphic design, commercial poster style, high-end marketing template, no realistic photography faces, clean vector or artistic backgrounds, vibrant colors, ";
+            const appConstraint = "USE ONLY FOR FLYER BACKGROUND DESIGN. SUBJECT: ";
             
             const finalPrompt = `${systemRules} ${appConstraint} ${userPrompt}`;
 
@@ -82,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
             img.onerror = () => {
                 loader.style.display = 'none';
                 btnGenerate.disabled = false;
-                alert("Error al conectar con la IA.");
+                alert("Error al conectar con el servidor de diseño.");
             };
 
         } catch (error) {
@@ -109,6 +106,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const posSub = document.getElementById('pos-subtitle').value;
 
         displayTitle.style.fontFamily = fontTitle;
+        displaySubtitle.style.fontFamily = fontSub;
+
         const contTitle = document.getElementById('cont-title');
         const contSub = document.getElementById('cont-subtitle');
         
@@ -126,9 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         await document.fonts.ready;
 
-        const canvas = document.createElement('canvas');
-        canvas.width = 800;
-        canvas.height = 1000;
+        const canvas = document.getElementById('hidden-canvas');
         const ctx = canvas.getContext('2d');
 
         const bgImg = new Image();
@@ -141,31 +138,40 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.fillStyle = "rgba(0,0,0,0.3)";
             ctx.fillRect(0, 0, 800, 1000);
 
-            // Título en Canvas
-            ctx.fillStyle = "white";
-            ctx.textAlign = "center";
-            const fontTitle = document.getElementById('font-title').value;
-            ctx.font = `bold 80px ${fontTitle}`;
-            
-            let yPosTitle = 500; 
-            const posTitleValue = document.getElementById('pos-title').value;
-            if(posTitleValue.includes('top')) yPosTitle = 200;
-            if(posTitleValue.includes('bottom')) yPosTitle = 800;
-            
-            ctx.fillText(displayTitle.innerText, 400, yPosTitle);
+            // Dibujar Título si no está oculto
+            if (document.getElementById('cont-title').style.visibility !== 'hidden') {
+                ctx.fillStyle = "white";
+                ctx.textAlign = "center";
+                const fontTitle = document.getElementById('font-title').value;
+                ctx.font = `bold 80px ${fontTitle}`;
+                
+                let yPosTitle = 500; 
+                const posTitleValue = document.getElementById('pos-title').value;
+                if(posTitleValue.includes('top')) yPosTitle = 200;
+                if(posTitleValue.includes('bottom')) yPosTitle = 800;
+                
+                ctx.fillText(displayTitle.innerText, 400, yPosTitle);
+            }
 
-            // Subtítulo en Canvas
-            const fontSub = document.getElementById('font-subtitle').value;
-            ctx.font = `40px ${fontSub}`;
-            let yPosSub = yPosTitle + 70;
-            const posSubValue = document.getElementById('pos-subtitle').value;
-            if(posSubValue.includes('top')) yPosSub = 280;
-            if(posSubValue.includes('bottom')) yPosSub = 880;
+            // Dibujar Subtítulo si no está oculto
+            if (document.getElementById('cont-subtitle').style.visibility !== 'hidden') {
+                const fontSub = document.getElementById('font-subtitle').value;
+                ctx.font = `40px ${fontSub}`;
+                let yPosTitle = 500; 
+                const posTitleValue = document.getElementById('pos-title').value;
+                if(posTitleValue.includes('top')) yPosTitle = 200;
+                if(posTitleValue.includes('bottom')) yPosTitle = 800;
 
-            ctx.fillText(displaySubtitle.innerText, 400, yPosSub);
+                let yPosSub = yPosTitle + 70;
+                const posSubValue = document.getElementById('pos-subtitle').value;
+                if(posSubValue.includes('top')) yPosSub = 280;
+                if(posSubValue.includes('bottom')) yPosSub = 880;
+
+                ctx.fillText(displaySubtitle.innerText, 400, yPosSub);
+            }
 
             const link = document.createElement('a');
-            link.download = `flyer-${Date.now()}.png`;
+            link.download = `flyer-ia-${Date.now()}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
         };
