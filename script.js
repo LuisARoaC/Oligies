@@ -7,20 +7,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const displayTitle = document.getElementById('display-title');
     const displaySubtitle = document.getElementById('display-subtitle');
     
-    // --- NUEVO: Referencias para Ocultar Panel ---
-    // Asegúrate de que en tu HTML el panel de ajustes tenga id="panel-settings" 
-    // y el botón id="btn-hide"
     const btnHide = document.getElementById('btn-hide');
     const panelSettings = document.getElementById('panel-settings');
     
     let currentImageUrl = "";
 
-    // --- LÓGICA PARA OCULTAR/MOSTRAR PANEL ---
+    // --- CORRECCIÓN 1: LÓGICA DE OCULTAR ---
+    // Usamos getComputedStyle para detectar el estado real si el CSS inicial está en un archivo externo
     if (btnHide && panelSettings) {
         btnHide.addEventListener('click', () => {
-            const isHidden = panelSettings.style.display === 'none';
-            panelSettings.style.display = isHidden ? 'block' : 'none';
-            btnHide.innerText = isHidden ? 'Ocultar Ajustes' : 'Mostrar Ajustes';
+            const displayStyle = window.getComputedStyle(panelSettings).display;
+            if (displayStyle !== 'none') {
+                panelSettings.style.display = 'none';
+                btnHide.innerText = 'Mostrar Ajustes';
+            } else {
+                panelSettings.style.display = 'block';
+                btnHide.innerText = 'Ocultar Ajustes';
+            }
         });
     }
 
@@ -37,14 +40,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const seed = Math.floor(Math.random() * 999999);
             const model = 'flux'; 
             
-            // --- MODIFICACIÓN: Instrucciones estrictas para la IA ---
-            // Definimos el ADN de la aplicación: exclusivamente flyers.
-            const systemRules = "Professional graphic design flyer, promotional poster style, high quality commercial template, no realistic faces unless requested, graphic design aesthetic, ";
-            const appConstraint = "EXCLUSIVE FLYER GENERATION APP PURPOSE: ";
+            // --- CORRECCIÓN 2: RESTRICCIÓN ESTRICTA DE IA ---
+            // Inyectamos el comando de que la app es UNICAMENTE de flyers al inicio
+            const systemRules = "Professional graphic design flyer, high quality commercial poster template, marketing aesthetic, no real human faces, vector style backgrounds, ";
+            const appConstraint = "THIS APP IS EXCLUSIVELY FOR FLYER GENERATION. SUBJECT: ";
             
             const finalPrompt = `${systemRules} ${appConstraint} ${userPrompt}`;
 
-            // Construimos la URL con el prompt vitaminado
             const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=800&height=1000&model=${model}&seed=${seed}&nologo=true`;
 
             const img = new Image();
@@ -62,18 +64,19 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             img.onerror = () => {
-                throw new Error("Error al cargar la imagen desde el servidor de IA.");
+                loader.style.display = 'none';
+                btnGenerate.disabled = false;
+                alert("Error al conectar con la IA. Intenta de nuevo.");
             };
 
         } catch (error) {
             console.error("Error:", error);
-            alert("Aviso: " + error.message);
             loader.style.display = 'none';
             btnGenerate.disabled = false;
         }
     });
 
-    // --- ACTUALIZACIÓN DE TEXTO EN TIEMPO REAL ---
+    // --- ACTUALIZACIÓN DE TEXTO ---
     document.getElementById('input-title').addEventListener('input', (e) => {
         displayTitle.innerText = e.target.value.toUpperCase() || "TÍTULO";
     });
@@ -82,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
         displaySubtitle.innerText = e.target.value || "Subtítulo";
     });
 
-    // --- MANEJO DE TIPOGRAFÍAS Y POSICIONES ---
+    // --- CORRECCIÓN 3: MANEJO DE TIPOGRAFÍAS ---
     const updateStyles = () => {
         const fontTitle = document.getElementById('font-title').value;
         const posTitle = document.getElementById('pos-title').value;
@@ -90,19 +93,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const posSub = document.getElementById('pos-subtitle').value;
 
         displayTitle.style.fontFamily = fontTitle;
-        document.getElementById('cont-title').className = `text-wrap ${posTitle}`;
-
-        displaySubtitle.style.fontFamily = fontSub;
-        document.getElementById('cont-subtitle').className = `text-wrap ${posSub}`;
+        // Asegúrate de que los contenedores 'cont-title' y 'cont-subtitle' existan en tu HTML
+        const contTitle = document.getElementById('cont-title');
+        const contSub = document.getElementById('cont-subtitle');
+        
+        if(contTitle) contTitle.className = `text-wrap ${posTitle}`;
+        if(contSub) contSub.className = `text-wrap ${posSub}`;
     };
 
     document.querySelectorAll('select').forEach(select => {
         select.addEventListener('change', updateStyles);
     });
 
-    // --- DESCARGAR FLYER ---
-    document.getElementById('btn-download').addEventListener('click', () => {
+    // --- CORRECCIÓN 4: DESCARGA (SEGURIDAD DE FUENTES) ---
+    document.getElementById('btn-download').addEventListener('click', async () => {
         if (!currentImageUrl) return alert("Primero genera una imagen de fondo.");
+
+        // Aseguramos que las fuentes estén cargadas antes de dibujar en el Canvas
+        await document.fonts.ready;
 
         const canvas = document.createElement('canvas');
         canvas.width = 800;
@@ -115,12 +123,16 @@ document.addEventListener('DOMContentLoaded', () => {
         
         bgImg.onload = () => {
             ctx.drawImage(bgImg, 0, 0, 800, 1000);
+            
+            // Filtro para mejorar legibilidad del texto
             ctx.fillStyle = "rgba(0,0,0,0.3)";
             ctx.fillRect(0, 0, 800, 1000);
 
+            // Título
             ctx.fillStyle = "white";
             ctx.textAlign = "center";
-            ctx.font = `bold 80px ${document.getElementById('font-title').value}`;
+            const selectedFontTitle = document.getElementById('font-title').value;
+            ctx.font = `bold 80px ${selectedFontTitle}`;
             
             let yPosTitle = 500; 
             const posTitleValue = document.getElementById('pos-title').value;
@@ -129,7 +141,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
             ctx.fillText(displayTitle.innerText, 400, yPosTitle);
 
-            ctx.font = `40px ${document.getElementById('font-subtitle').value}`;
+            // Subtítulo
+            const selectedFontSub = document.getElementById('font-subtitle').value;
+            ctx.font = `40px ${selectedFontSub}`;
             let yPosSub = yPosTitle + 70;
             const posSubValue = document.getElementById('pos-subtitle').value;
             if(posSubValue.includes('top')) yPosSub = 280;
