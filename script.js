@@ -7,27 +7,46 @@ document.addEventListener('DOMContentLoaded', () => {
     const displayTitle = document.getElementById('display-title');
     const displaySubtitle = document.getElementById('display-subtitle');
     
-    // Guardamos la URL de la imagen actual para la descarga
+    // --- NUEVO: Referencias para Ocultar Panel ---
+    // Asegúrate de que en tu HTML el panel de ajustes tenga id="panel-settings" 
+    // y el botón id="btn-hide"
+    const btnHide = document.getElementById('btn-hide');
+    const panelSettings = document.getElementById('panel-settings');
+    
     let currentImageUrl = "";
 
-    // --- GENERACIÓN CON IA (DIRECTA A POLLINATIONS) ---
+    // --- LÓGICA PARA OCULTAR/MOSTRAR PANEL ---
+    if (btnHide && panelSettings) {
+        btnHide.addEventListener('click', () => {
+            const isHidden = panelSettings.style.display === 'none';
+            panelSettings.style.display = isHidden ? 'block' : 'none';
+            btnHide.innerText = isHidden ? 'Ocultar Ajustes' : 'Mostrar Ajustes';
+        });
+    }
+
+    // --- GENERACIÓN CON IA ---
     btnGenerate.addEventListener('click', async () => {
-        const prompt = inputPrompt.value.trim();
-        if (!prompt) return alert("Escribe qué quieres generar (ej: 'cyberpunk city')");
+        const userPrompt = inputPrompt.value.trim();
+        if (!userPrompt) return alert("Escribe qué quieres generar para el flyer");
 
         loader.style.display = 'block';
-        loader.innerText = "La IA está trabajando...";
+        loader.innerText = "Diseñando tu flyer exclusivo...";
         btnGenerate.disabled = true;
 
         try {
-            // Lógica fusionada: Generamos la URL directamente
             const seed = Math.floor(Math.random() * 999999);
-            const model = 'flux'; // Puedes cambiarlo a 'turbo' si quieres más velocidad
+            const model = 'flux'; 
             
-            // Construimos la URL de Pollinations
-            const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=800&height=1000&model=${model}&seed=${seed}&nologo=true`;
+            // --- MODIFICACIÓN: Instrucciones estrictas para la IA ---
+            // Definimos el ADN de la aplicación: exclusivamente flyers.
+            const systemRules = "Professional graphic design flyer, promotional poster style, high quality commercial template, no realistic faces unless requested, graphic design aesthetic, ";
+            const appConstraint = "EXCLUSIVE FLYER GENERATION APP PURPOSE: ";
+            
+            const finalPrompt = `${systemRules} ${appConstraint} ${userPrompt}`;
 
-            // Pre-cargamos la imagen para asegurarnos de que existe antes de mostrarla
+            // Construimos la URL con el prompt vitaminado
+            const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=800&height=1000&model=${model}&seed=${seed}&nologo=true`;
+
             const img = new Image();
             img.crossOrigin = "anonymous"; 
             img.src = imageUrl;
@@ -37,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 flyerPreview.style.backgroundSize = "cover";
                 flyerPreview.style.backgroundPosition = "center";
                 
-                currentImageUrl = imageUrl; // Guardamos la URL para el canvas de descarga
+                currentImageUrl = imageUrl;
                 loader.style.display = 'none';
                 btnGenerate.disabled = false;
             };
@@ -91,18 +110,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const ctx = canvas.getContext('2d');
 
         const bgImg = new Image();
-        bgImg.crossOrigin = "anonymous"; // Importante para permitir la descarga
+        bgImg.crossOrigin = "anonymous"; 
         bgImg.src = currentImageUrl;
         
         bgImg.onload = () => {
-            // 1. Dibujar el fondo
             ctx.drawImage(bgImg, 0, 0, 800, 1000);
-
-            // 2. Capa de oscurecimiento suave
             ctx.fillStyle = "rgba(0,0,0,0.3)";
             ctx.fillRect(0, 0, 800, 1000);
 
-            // 3. Dibujar Título
             ctx.fillStyle = "white";
             ctx.textAlign = "center";
             ctx.font = `bold 80px ${document.getElementById('font-title').value}`;
@@ -114,7 +129,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             ctx.fillText(displayTitle.innerText, 400, yPosTitle);
 
-            // 4. Dibujar Subtítulo (añadido para que no falte en la descarga)
             ctx.font = `40px ${document.getElementById('font-subtitle').value}`;
             let yPosSub = yPosTitle + 70;
             const posSubValue = document.getElementById('pos-subtitle').value;
@@ -123,7 +137,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             ctx.fillText(displaySubtitle.innerText, 400, yPosSub);
 
-            // 5. Ejecutar descarga
             const link = document.createElement('a');
             link.download = `flyer-${Date.now()}.png`;
             link.href = canvas.toDataURL('image/png');
